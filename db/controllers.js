@@ -1,6 +1,6 @@
 
-// const topics = require("./data/topics")
-const {fetchTopics,} = require('../models/topics-model')
+const {fetchTopics} = require('../models/models')
+const {fetchArticles} = require('../models/models')
 
 
 
@@ -11,4 +11,11 @@ const getTopics = (req, res) => {
     })
 }
 
-module.exports = {getTopics}
+const getArticles = (req, res) => {
+    fetchArticles().then((articles)=>{
+       
+        res.status(200).send({articles})
+    })
+}
+
+module.exports = {getTopics, getArticles}
