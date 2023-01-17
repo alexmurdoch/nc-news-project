@@ -62,8 +62,6 @@ describe("get/api/articles/:articleid", () => {
       .get("/api/articles/1")
       .expect(200)
       .then(({ body }) => {
-        console.log(body.article);
-
         expect(body.article).toEqual({
           article_id: 1,
           title: "Living in the shadow of a great man",
@@ -77,34 +75,24 @@ describe("get/api/articles/:articleid", () => {
         });
       });
   });
+  test("responds with 404 if invalid path", () => {
+    return request(app)
+      .get("/api/articles/500")
+      .expect(404)
+      .then(({ body }) => {
+        expect(body.msg).toBe("Article does not exist");
+      });
+  });
 });
-//did not order
 
-// describe("get/api/articles/:articleid/comments", () => {
-//   test("Return an array of comments with 200 message for correct article ID", () => {
-//     return request(app)
-//       .get("/api/articles/3/comments")
-//       .expect(200)
-//       .then(({ body }) => {
-//         console.log(body.article);
-
-//         expect(body.article).toEqual([
-//           {
-//             body: "git push origin master",
-//             votes: 0,
-//             author: "icellusedkars",
-//             article_id: 3,
-//             created_at: 1592641440000,
-//           },
-//           {
-//             body: "Ambidextrous marsupial",
-//             votes: 0,
-//             author: "icellusedkars",
-//             article_id: 3,
-//             created_at: 1600560600000,
-//           }
-//         ])
-//         });
-//       });
-//   });
+describe("invalid path", () => {
+  test("404 invalid path", () => {
+    return request(app)
+      .get("/invalid-path")
+      .expect(404)
+      .then(({ body }) => {
+        expect(body.msg).toBe("Path not found");
+      });
+  });
+});
 
