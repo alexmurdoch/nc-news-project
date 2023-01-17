@@ -165,39 +165,4 @@ describe.only("post/api/articles/:articleid/comments", () => {
   });
 });
 
-///delete
-// describe("POST new restaurant", () => {
-//   test("add a restaurant ", () => {
-//       const restaurant = { restaurant_name: "The Codfather",
-//       area_id: 2,
-//       cuisine: "British",
-//       website: "www.thecodfather.com"}
-//     return request(app)
-//       .post('/api/restaurants')
-//       .send(restaurant)
-//       .expect(201)
-//       .then((response) => {
-//         const { body } = response;
-//         expect(body.newRestaurant).toEqual({
-//          restaurant_id: 9,
-//          ...restaurant
-//         });
-//       });
-//   });
-// });
-// test.only("make error ", () => {
-//   const restaurant = { restaurant_name: "The Codfather",
-//   area_id:"meme",
-//   cuisine: "British",
-//   website: "www.thecodfather.com"}
-// return request(app)
-//   .post('/api/restaurants')
-//   .send(restaurant)
-//   .expect(400)
-//   .then((response) => {
-//     const { body } = response;
-//     expect(body.message).toBe(
-//     "bad request"
-//     );
-//   });
-// });
+
