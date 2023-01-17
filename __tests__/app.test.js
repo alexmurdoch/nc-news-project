@@ -131,7 +131,7 @@ describe("get/api/articles/:articleid/comments", () => {
   });
 });
 
-describe.only("post/api/articles/:articleid/comments", () => {
+describe("post/api/articles/:articleid/comments", () => {
   test("adds an object with a username and body with 201 message and returns the posted comment", () => {
     const comment = {
       username: "icellusedkars",
@@ -150,7 +150,7 @@ describe.only("post/api/articles/:articleid/comments", () => {
         expect(typeof result.body.created_at).toBe(typeof Date());
       });
   });
-  test.only("returns 404 error if invalid path", () => {
+  test("returns 404 error if invalid path", () => {
     const comment = {
       username: "icellusedkars",
       body: "Great article!",
