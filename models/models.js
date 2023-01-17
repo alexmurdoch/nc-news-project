@@ -18,7 +18,8 @@ const fetchArticles = () => {
       `SELECT articles.*, COUNT(comments.article_id) AS comment_count
     FROM comments
      RIGHT JOIN articles ON comments.article_id = articles.article_id
-    GROUP BY articles.article_id;`
+    GROUP BY articles.article_id
+    ORDER BY created_at DESC;`
     )
     .then((result) => {
       return result.rows;
@@ -32,4 +33,6 @@ const fetchArticleById = (article_id) => {
       .then((result) => result.rows[0]);
   };
 
-module.exports = { fetchTopics, fetchArticles, fetchArticleById };
+
+
+  module.exports = { fetchTopics, fetchArticles, fetchArticleById };
