@@ -3,6 +3,7 @@ const {
   fetchArticles,
   fetchArticleById,
   fetchCommentsByArticleId,
+  addCommentByArticleId,
 } = require("../models/models");
 
 const getTopics = (req, res) => {
@@ -38,14 +39,36 @@ const getArticleById = (req, res, next) => {
 };
 
 const getCommentsByArticleId = (req, res, next) => {
-    const { article_id } = req.params;
-    
-    fetchCommentsByArticleId(article_id).then((article) => {
-        res.status(200).send({ article });
-      })
-      .catch((err) => {
-        next(err);
-      });
-}
+  const { article_id } = req.params;
 
-module.exports = { getTopics, getArticles, getArticleById, getCommentsByArticleId };
+  fetchCommentsByArticleId(article_id)
+    .then((article) => {
+      res.status(200).send({ article });
+    })
+    .catch((err) => {
+      next(err);
+    });
+};
+
+const postCommentByArticleId = (req, res, next) => {
+  const { article_id } = req.params;
+  const post = req.body;
+
+  addCommentByArticleId(article_id, post)
+    .then((post) => {
+      res.status(201).send(post.rows[0]);
+    })
+    .catch((err) => {
+      res.status(404).send({ msg: "404, article not found" });
+
+      next(err);
+    });
+};
+
+module.exports = {
+  getTopics,
+  getArticles,
+  getArticleById,
+  getCommentsByArticleId,
+  postCommentByArticleId,
+};

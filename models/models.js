@@ -45,12 +45,13 @@ const fetchArticleById = (article_id) => {
 
 const fetchCommentsByArticleId = (article_id) => {
   return db
-    .query(`SELECT * FROM comments WHERE article_id = $1
-    ORDER BY created_at;`, [article_id])
+    .query(
+      `SELECT * FROM comments WHERE article_id = $1
+    ORDER BY created_at;`,
+      [article_id]
+    )
     .then((result) => {
-
       const comments = result.rows;
-   
 
       if (comments.length === 0) {
         return Promise.reject({
@@ -61,6 +62,27 @@ const fetchCommentsByArticleId = (article_id) => {
         return result.rows;
       }
     });
-}
+};
 
-module.exports = { fetchTopics, fetchArticles, fetchArticleById, fetchCommentsByArticleId };
+const addCommentByArticleId = (article_id, post) => {
+  const { username, body } = post;
+
+  return db
+    .query(
+      `INSERT INTO comments
+  (article_id, author, body)
+  VALUES ($1, $2, $3) RETURNING *;`,
+      [article_id, username, body]
+    )
+    .then((comment) => {
+      return comment;
+    });
+};
+
+module.exports = {
+  fetchTopics,
+  fetchArticles,
+  fetchArticleById,
+  fetchCommentsByArticleId,
+  addCommentByArticleId,
+};

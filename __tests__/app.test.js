@@ -95,15 +95,12 @@ describe("get/api/articles/:articleid", () => {
   });
 });
 
-
 describe("get/api/articles/:articleid/comments", () => {
   test("Return an array of comments with 200 message for correct article ID", () => {
     return request(app)
       .get("/api/articles/3/comments")
       .expect(200)
       .then(({ body }) => {
-
-
         expect(body.article).toEqual([
           {
             body: "git push origin master",
@@ -120,11 +117,11 @@ describe("get/api/articles/:articleid/comments", () => {
             comment_id: 11,
             article_id: 3,
             created_at: "2020-09-19T23:10:00.000Z",
-          }
-        ])
-        });
+          },
+        ]);
       });
-  test('returns correct errors for invalid paths', () => {
+  });
+  test("returns correct errors for invalid paths", () => {
     return request(app)
       .get("/api/articles/500/comments")
       .expect(404)
@@ -132,5 +129,75 @@ describe("get/api/articles/:articleid/comments", () => {
         expect(body.msg).toBe("no comments for given article");
       });
   });
+});
+
+describe.only("post/api/articles/:articleid/comments", () => {
+  test("adds an object with a username and body with 201 message and returns the posted comment", () => {
+    const comment = {
+      username: "icellusedkars",
+      body: "Great article!",
+    };
+    return request(app)
+      .post("/api/articles/3/comments")
+      .send(comment)
+      .expect(201)
+      .then((result) => {
+        expect(result.body.comment_id).toBe(19);
+        expect(result.body.author).toBe("icellusedkars");
+        expect(result.body.body).toBe("Great article!");
+        expect(result.body.votes).toBe(0);
+        expect(result.body.article_id).toBe(3);
+        expect(typeof result.body.created_at).toBe(typeof Date());
+      });
   });
- 
+  test.only("returns 404 error if invalid path", () => {
+    const comment = {
+      username: "icellusedkars",
+      body: "Great article!",
+    };
+    return request(app)
+      .post("/api/articles/500/comments")
+      .send(comment)
+      .expect(404)
+      .then(({ body }) => {
+        expect(body).toEqual({ msg: "404, article not found" });
+      });
+  });
+});
+
+///delete
+// describe("POST new restaurant", () => {
+//   test("add a restaurant ", () => {
+//       const restaurant = { restaurant_name: "The Codfather",
+//       area_id: 2,
+//       cuisine: "British",
+//       website: "www.thecodfather.com"}
+//     return request(app)
+//       .post('/api/restaurants')
+//       .send(restaurant)
+//       .expect(201)
+//       .then((response) => {
+//         const { body } = response;
+//         expect(body.newRestaurant).toEqual({
+//          restaurant_id: 9,
+//          ...restaurant
+//         });
+//       });
+//   });
+// });
+// test.only("make error ", () => {
+//   const restaurant = { restaurant_name: "The Codfather",
+//   area_id:"meme",
+//   cuisine: "British",
+//   website: "www.thecodfather.com"}
+// return request(app)
+//   .post('/api/restaurants')
+//   .send(restaurant)
+//   .expect(400)
+//   .then((response) => {
+//     const { body } = response;
+//     expect(body.message).toBe(
+//     "bad request"
+//     );
+//   });
+// });
