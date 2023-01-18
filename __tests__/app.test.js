@@ -12,6 +12,16 @@ afterAll(() => {
   return db.end();
 });
 
+describe("invalid path", () => {
+  test("404 invalid path", () => {
+    return request(app)
+      .get("/invalid-path")
+      .expect(404)
+      .then(({ body }) => {
+        expect(body.msg).toBe("Path not found");
+      });
+  });
+});
 describe("get/api/topics", () => {
   test("Return topics with the correct properties with 200", () => {
     return request(app)
@@ -85,14 +95,74 @@ describe("get/api/articles/:articleid", () => {
   });
 });
 
-describe("invalid path", () => {
-  test("404 invalid path", () => {
+describe("get/api/articles/:articleid/comments", () => {
+  test("Return an array of comments with 200 message for correct article ID", () => {
     return request(app)
-      .get("/invalid-path")
+      .get("/api/articles/3/comments")
+      .expect(200)
+      .then(({ body }) => {
+        expect(body.article).toEqual([
+          {
+            body: "git push origin master",
+            votes: 0,
+            author: "icellusedkars",
+            comment_id: 10,
+            article_id: 3,
+            created_at: "2020-06-20T07:24:00.000Z",
+          },
+          {
+            body: "Ambidextrous marsupial",
+            votes: 0,
+            author: "icellusedkars",
+            comment_id: 11,
+            article_id: 3,
+            created_at: "2020-09-19T23:10:00.000Z",
+          },
+        ]);
+      });
+  });
+  test("returns correct errors for invalid paths", () => {
+    return request(app)
+      .get("/api/articles/500/comments")
       .expect(404)
       .then(({ body }) => {
-        expect(body.msg).toBe("Path not found");
+        expect(body.msg).toBe("no comments for given article");
       });
   });
 });
+
+describe("post/api/articles/:articleid/comments", () => {
+  test("adds an object with a username and body with 201 message and returns the posted comment", () => {
+    const comment = {
+      username: "icellusedkars",
+      body: "Great article!",
+    };
+    return request(app)
+      .post("/api/articles/3/comments")
+      .send(comment)
+      .expect(201)
+      .then((result) => {
+        expect(result.body.comment_id).toBe(19);
+        expect(result.body.author).toBe("icellusedkars");
+        expect(result.body.body).toBe("Great article!");
+        expect(result.body.votes).toBe(0);
+        expect(result.body.article_id).toBe(3);
+        expect(typeof result.body.created_at).toBe(typeof Date());
+      });
+  });
+  test("returns 404 error if invalid path", () => {
+    const comment = {
+      username: "icellusedkars",
+      body: "Great article!",
+    };
+    return request(app)
+      .post("/api/articles/500/comments")
+      .send(comment)
+      .expect(404)
+      .then(({ body }) => {
+        expect(body).toEqual({ msg: "404, article not found" });
+      });
+  });
+});
+
 
