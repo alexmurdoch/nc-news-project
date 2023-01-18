@@ -101,7 +101,7 @@ describe("get/api/articles/:articleid/comments", () => {
       .get("/api/articles/3/comments")
       .expect(200)
       .then(({ body }) => {
-        expect(body.article).toEqual([
+        expect(body).toEqual([
           {
             body: "git push origin master",
             votes: 0,
