@@ -5,6 +5,7 @@ const {
   fetchCommentsByArticleId,
   addCommentByArticleId,
   addVotes,
+  fetchUsers,
 } = require("./models");
 
 const getTopics = (req, res, next) => {
@@ -79,11 +80,18 @@ const patchArticleByArticleId = (req, res, next) => {
     });
 };
 
-// const getArticlesQuery = (req,res,next)
-
-// const
+const getUsers = (req, res, next) => {
+  fetchUsers()
+    .then((users) => {
+      res.status(200).send(users);
+    })
+    .catch((err) => {
+      next(err);
+    });
+};
 
 module.exports = {
+  getUsers,
   getTopics,
   getArticles,
   getArticleById,

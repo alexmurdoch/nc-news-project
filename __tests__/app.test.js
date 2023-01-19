@@ -231,6 +231,26 @@ describe("patch/api/articles/:article_id", () => {
   });
 });
 
+describe("get/api/users", () => {
+  test("Return users with the correct properties with 200", () => {
+    return request(app)
+      .get("/api/users")
+      .expect(200)
+      .then(({ body }) => {
+        expect(body).toHaveLength(4);
+        body.forEach((user) => {
+          expect(user).toEqual(
+            expect.objectContaining({
+              username: expect.any(String),
+              name: expect.any(String),
+              avatar_url: expect.any(String),
+            })
+          );
+        });
+      });
+  });
+});
+
 describe("api queries", () => {
   test("returns correct topic to the topic query", () => {
     return request(app)
