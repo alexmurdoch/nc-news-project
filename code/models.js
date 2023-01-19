@@ -97,6 +97,20 @@ const addVotes = (article_id, votes) => {
     });
 };
 
+const fetchUsers = () => {
+ 
+  return db
+    .query(
+      `
+    SELECT * FROM users;
+    `
+    )
+    .then((result) => {
+     
+      return result.rows;
+    });
+}
+
 module.exports = {
   fetchTopics,
   fetchArticles,
@@ -104,4 +118,5 @@ module.exports = {
   fetchCommentsByArticleId,
   addCommentByArticleId,
   addVotes,
+  fetchUsers
 };
