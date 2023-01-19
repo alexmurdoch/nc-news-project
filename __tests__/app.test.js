@@ -1,5 +1,5 @@
 const db = require("../db/connection");
-const app = require("../db/app");
+const app = require("../code/app");
 const seed = require("../db/seeds/seed");
 const data = require("../db/data/test-data");
 const request = require("supertest");
@@ -142,12 +142,7 @@ describe("post/api/articles/:articleid/comments", () => {
       .send(comment)
       .expect(201)
       .then((result) => {
-        expect(result.body.comment_id).toBe(19);
-        expect(result.body.author).toBe("icellusedkars");
-        expect(result.body.body).toBe("Great article!");
-        expect(result.body.votes).toBe(0);
-        expect(result.body.article_id).toBe(3);
-        expect(typeof result.body.created_at).toBe(typeof Date());
+        expect(result.body).toEqual({ comment: "Great article!" });
       });
   });
   test("returns 404 error if invalid path", () => {
@@ -164,5 +159,74 @@ describe("post/api/articles/:articleid/comments", () => {
       });
   });
 });
+test("returns 404 error if article id not a number", () => {
+  const comment = {
+    username: "icellusedkars",
+    body: "Great article!",
+  };
+  return request(app)
+    .post("/api/articles/alex/comments")
+    .send(comment)
+    .expect(404)
+    .then(({ body }) => {
+      expect(body).toEqual({ msg: "404, article not found" });
+    });
+});
 
+test("returns 404 error if no comment given", () => {
+  const comment = {
+    username: "icellusedkars",
+  };
+  return request(app)
+    .post("/api/articles/alex/comments")
+    .send(comment)
+    .expect(404)
+    .then(({ body }) => {
+      expect(body).toEqual({ msg: "404, article not found" });
+    });
+});
 
+describe("patch/api/articles/:article_id", () => {
+  test("updates the votes of an article by given paramater, no existing votes", () => {
+    const votes = { inc_votes: 10 };
+    return request(app)
+      .patch("/api/articles/3")
+      .send(votes)
+      .expect(200)
+      .then(({ body }) => {
+        expect(body).toEqual(
+          expect.objectContaining({
+            article_id: expect.any(Number),
+            title: expect.any(String),
+            topic: expect.any(String),
+            created_at: expect.any(String),
+            article_img_url: expect.any(String),
+            votes: expect.any(Number),
+            author: expect.any(String),
+            body: expect.any(String),
+          })
+        );
+        expect(body.votes).toBe(10);
+      });
+  });
+  test("returns 404 error if invalid article", () => {
+    const votes = { inc_votes: 10 };
+    return request(app)
+      .patch("/api/articles/5000")
+      .send(votes)
+      .expect(404)
+      .then((body) => {
+        expect(body._body.msg).toBe("Invalid article ID or no votes passed");
+      });
+  });
+  test("returns 404 error if invalid format for votes given", () => {
+    const votes = { votes: "10" };
+    return request(app)
+      .patch("/api/articles/5000")
+      .send(votes)
+      .expect(404)
+      .then((body) => {
+        expect(body._body.msg).toBe("Invalid article ID or no votes passed");
+      });
+  });
+});

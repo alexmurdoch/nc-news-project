@@ -75,7 +75,25 @@ const addCommentByArticleId = (article_id, post) => {
       [article_id, username, body]
     )
     .then((comment) => {
-      return comment;
+      return comment.rows[0].body;
+    });
+};
+
+const addVotes = (article_id, votes) => {
+  return db
+    .query(
+      `UPDATE articles SET votes = votes + ($2) WHERE article_id = ($1) RETURNING *`,
+      [article_id, votes]
+    )
+    .then((article) => {
+      if (article.rows.length === 0) {
+        return Promise.reject({
+          status: 404,
+          msg: "Invalid article ID or no votes passed",
+        });
+      } else {
+        return article.rows[0];
+      }
     });
 };
 
@@ -85,4 +103,5 @@ module.exports = {
   fetchArticleById,
   fetchCommentsByArticleId,
   addCommentByArticleId,
+  addVotes,
 };

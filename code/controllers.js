@@ -4,7 +4,8 @@ const {
   fetchArticleById,
   fetchCommentsByArticleId,
   addCommentByArticleId,
-} = require("../models/models");
+  addVotes,
+} = require("./models");
 
 const getTopics = (req, res) => {
   fetchTopics()
@@ -56,11 +57,24 @@ const postCommentByArticleId = (req, res, next) => {
 
   addCommentByArticleId(article_id, post)
     .then((post) => {
-      res.status(201).send(post.rows[0]);
+      res.status(201).send({ comment: post });
     })
     .catch((err) => {
       res.status(404).send({ msg: "404, article not found" });
 
+      next(err);
+    });
+};
+
+const patchArticleByArticleId = (req, res, next) => {
+  const { article_id } = req.params;
+  const { inc_votes } = req.body;
+
+  addVotes(article_id, inc_votes)
+    .then((article) => {
+      res.status(200).send(article);
+    })
+    .catch((err) => {
       next(err);
     });
 };
@@ -71,4 +85,5 @@ module.exports = {
   getArticleById,
   getCommentsByArticleId,
   postCommentByArticleId,
+  patchArticleByArticleId,
 };
