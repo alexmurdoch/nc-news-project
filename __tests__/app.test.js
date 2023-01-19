@@ -230,7 +230,7 @@ describe("patch/api/articles/:article_id", () => {
       });
   });
 });
-describe.only("get/api/users", () => {
+describe("get/api/users", () => {
   test("Return users with the correct properties with 200", () => {
     return request(app)
       .get("/api/users")
