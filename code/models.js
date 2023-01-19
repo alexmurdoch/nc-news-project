@@ -13,20 +13,40 @@ const fetchTopics = () => {
 };
 
 const fetchArticles = (query) => {
-  console.log(query);
-  const search = query.topic || '';
-  const sort = query.sort || 'created_at';
-  const direction = query.direction || 'desc';
+  const search = query.topic || "";
+  const sort = query.sort_by || "created_at";
+  const direction = query.order || "desc";
+
+  if (
+    ["id", "created_at", "topic", "body", "votes", "author", "title"].includes(
+      sort
+    ) === false
+  ) {
+    return Promise.reject({
+      status: 404,
+      msg: "invalid sort_by query",
+    });
+  }
+
+  if (["asc", "desc"].includes(direction) === false) {
+    return Promise.reject({
+      status: 404,
+      msg: "invalid order query",
+    });
+  }
 
   return db
-    .query(`
+    .query(
+      `
       SELECT articles.*, COUNT(comments.article_id) AS comment_count
       FROM articles
       LEFT JOIN comments ON comments.article_id = articles.article_id
-      ${search ? 'WHERE topic = $1' : ''}
+      ${search ? "WHERE topic = $1" : ""}
       GROUP BY articles.article_id
       ORDER BY ${sort} ${direction}
-    `, search ? [search] : [])
+    `,
+      search ? [search] : []
+    )
     .then((result) => {
       const unfiltered = result.rows;
 

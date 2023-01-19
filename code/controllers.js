@@ -18,7 +18,6 @@ const getTopics = (req, res, next) => {
 };
 
 const getArticles = (req, res, next) => {
-  
   fetchArticles(req.query)
     .then((articles) => {
       res.status(200).send({ articles });
