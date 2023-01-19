@@ -7,7 +7,7 @@ const {
   addVotes,
 } = require("./models");
 
-const getTopics = (req, res) => {
+const getTopics = (req, res, next) => {
   fetchTopics()
     .then((topics) => {
       res.status(200).send({ topics });
@@ -17,8 +17,9 @@ const getTopics = (req, res) => {
     });
 };
 
-const getArticles = (req, res) => {
-  fetchArticles()
+const getArticles = (req, res, next) => {
+  
+  fetchArticles(req.query)
     .then((articles) => {
       res.status(200).send({ articles });
     })
@@ -78,6 +79,10 @@ const patchArticleByArticleId = (req, res, next) => {
       next(err);
     });
 };
+
+// const getArticlesQuery = (req,res,next)
+
+// const
 
 module.exports = {
   getTopics,

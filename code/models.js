@@ -12,17 +12,25 @@ const fetchTopics = () => {
     });
 };
 
-const fetchArticles = () => {
+const fetchArticles = (query) => {
+  console.log(query);
+  const search = query.topic || '';
+  const sort = query.sort || 'created_at';
+  const direction = query.direction || 'desc';
+
   return db
-    .query(
-      `SELECT articles.*, COUNT(comments.article_id) AS comment_count
-    FROM comments
-     RIGHT JOIN articles ON comments.article_id = articles.article_id
-    GROUP BY articles.article_id
-    ORDER BY created_at DESC;`
-    )
+    .query(`
+      SELECT articles.*, COUNT(comments.article_id) AS comment_count
+      FROM articles
+      LEFT JOIN comments ON comments.article_id = articles.article_id
+      ${search ? 'WHERE topic = $1' : ''}
+      GROUP BY articles.article_id
+      ORDER BY ${sort} ${direction}
+    `, search ? [search] : [])
     .then((result) => {
-      return result.rows;
+      const unfiltered = result.rows;
+
+      return unfiltered;
     });
 };
 
@@ -105,3 +113,8 @@ module.exports = {
   addCommentByArticleId,
   addVotes,
 };
+// `SELECT articles.*, COUNT(comments.article_id) AS comment_count
+// FROM comments
+//  RIGHT JOIN articles ON comments.article_id = articles.article_id
+// GROUP BY articles.article_id
+// ORDER BY created_at DESC;`

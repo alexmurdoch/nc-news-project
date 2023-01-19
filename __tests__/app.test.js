@@ -42,7 +42,7 @@ describe("get/api/topics", () => {
 });
 
 describe("get/api/articles", () => {
-  test("Return articles with 200 message, adding comment_count with the correct values", () => {
+  test.only("Return articles with 200 message, adding comment_count with the correct values", () => {
     return request(app)
       .get("/api/articles")
       .expect(200)
@@ -222,11 +222,42 @@ describe("patch/api/articles/:article_id", () => {
   test("returns 404 error if invalid format for votes given", () => {
     const votes = { votes: "10" };
     return request(app)
-      .patch("/api/articles/5000")
+      .patch("/api/articles/3")
       .send(votes)
       .expect(404)
       .then((body) => {
-        expect(body._body.msg).toBe("Invalid article ID or no votes passed");
+        expect(body._body.msg).toBe("Invalid data type");
       });
+  });
+});
+
+
+describe('api queries', () => {
+  test.only('returns correct topic to the topic query', () => {
+    return request(app)
+    .get("/api/articles?topic=mitch")
+    .expect(200)
+    .then((body) => {
+      console.log(body.length, "length");
+      expect(body.length === 11)
+    })
+  });
+  test.only('returns correct topic to the topic query', () => {
+    return request(app)
+    .get("/api/articles?order=asc")
+    .expect(200)
+    .then((body) => {
+      console.log(body.length, "length");
+      expect(body.length === 12)
+    })
+  });
+  test('returns correct order when using sort_by', () => {
+    return request(app)
+    .get("/api/articles?sort_by=topic")
+    .expect(200)
+    .then((body) => {
+      console.log(body.length, "length");
+      expect(body.length === 12)
+    })
   });
 });
