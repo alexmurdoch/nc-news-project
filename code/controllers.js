@@ -42,10 +42,13 @@ const getArticleById = (req, res, next) => {
 
 const getCommentsByArticleId = (req, res, next) => {
   const { article_id } = req.params;
-
-  fetchCommentsByArticleId(article_id)
+  const query = req.query
+  
+  
+  fetchCommentsByArticleId(article_id, query)
     .then((article) => {
-      res.status(200).send({ article });
+      
+      res.status(200).send( article );
     })
     .catch((err) => {
       next(err);

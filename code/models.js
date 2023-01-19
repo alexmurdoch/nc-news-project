@@ -11,7 +11,7 @@ const fetchTopics = () => {
       return result.rows;
     });
 };
-
+//here vvvv
 const fetchArticles = (query) => {
   const search = query.topic || "";
   const sort = query.sort_by || "created_at";
@@ -70,8 +70,11 @@ const fetchArticleById = (article_id) => {
       }
     });
 };
-
-const fetchCommentsByArticleId = (article_id) => {
+// here vvvvv
+const fetchCommentsByArticleId = (article_id, query) => {
+  queryTruthy = (query.count || false)
+  
+  
   return db
     .query(
       `SELECT * FROM comments WHERE article_id = $1
@@ -87,7 +90,17 @@ const fetchCommentsByArticleId = (article_id) => {
           msg: "no comments for given article",
         });
       } else {
-        return result.rows;
+        if(queryTruthy === "true"){
+          let output = (result.rows, {comment_count: result.rows.length });
+            // console.log(result.rows, {comment_count: result.rows.length });
+          
+          return [result.rows , {comment_count: result.rows.length }]; 
+         
+        }
+        else{
+          
+          return result.rows
+        }
       }
     });
 };
