@@ -94,9 +94,11 @@ const getUsers = (req, res, next) => {
     });
 };
 const deleteComment = (req,res,next) => {
+  const id = req.params.comment_id
+  
   removeComment(id)
-    .then((comment)=> {
-      res.status(204).send(x)
+    .then(()=> {
+      res.status(204).send("object deleted")
     })
     .catch((err) => {
       next(err);
