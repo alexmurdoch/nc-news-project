@@ -11,7 +11,7 @@ const fetchTopics = () => {
       return result.rows;
     });
 };
-//here vvvv
+
 const fetchArticles = (query) => {
   const search = query.topic || "";
   const sort = query.sort_by || "created_at";
@@ -23,15 +23,22 @@ const fetchArticles = (query) => {
     ) === false
   ) {
     return Promise.reject({
-      status: 404,
+      status: 400,
       msg: "invalid sort_by query",
     });
   }
 
   if (["asc", "desc"].includes(direction) === false) {
     return Promise.reject({
-      status: 404,
+      status: 400,
       msg: "invalid order query",
+    });
+  }
+  if (typeof search !== "string") {
+    console.log("wrong");
+    return Promise.reject({
+      status: 400,
+      msg: "invalid topic query format",
     });
   }
 
@@ -49,7 +56,12 @@ const fetchArticles = (query) => {
     )
     .then((result) => {
       const unfiltered = result.rows;
-
+      if(result.rows.length === 0){
+        return Promise.reject({
+          status: 404,
+          msg: "No data for this topic",
+        });
+      }
       return unfiltered;
     });
 };
@@ -70,7 +82,7 @@ const fetchArticleById = (article_id) => {
       }
     });
 };
-// here vvvvv
+
 const fetchCommentsByArticleId = (article_id, query) => {
   queryTruthy = (query.count || false)
   
@@ -150,6 +162,10 @@ const fetchUsers = () => {
     });
 };
 
+const removeComment = (id) => {
+
+}
+
 module.exports = {
   fetchUsers,
   fetchTopics,
@@ -158,6 +174,7 @@ module.exports = {
   fetchCommentsByArticleId,
   addCommentByArticleId,
   addVotes,
+  removeComment
 };
 // `SELECT articles.*, COUNT(comments.article_id) AS comment_count
 // FROM comments

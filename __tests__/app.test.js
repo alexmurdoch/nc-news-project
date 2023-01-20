@@ -178,7 +178,7 @@ test("returns 404 error if no comment given", () => {
     username: "icellusedkars",
   };
   return request(app)
-    .post("/api/articles/alex/comments")
+    .post("/api/articles/3/comments")
     .send(comment)
     .expect(404)
     .then(({ body }) => {
@@ -302,7 +302,7 @@ describe("api queries", () => {
   test("invalid sort_by parameters cause error", () => {
     return request(app)
       .get("/api/articles?sort_by=break")
-      .expect(404)
+      .expect(400)
       .then(({ body }) => {
         expect(body.msg).toBe("invalid sort_by query");
       });
@@ -310,9 +310,25 @@ describe("api queries", () => {
   test("invalid order parameters cause error", () => {
     return request(app)
       .get("/api/articles?order=break")
-      .expect(404)
+      .expect(400)
       .then(({ body }) => {
         expect(body.msg).toBe("invalid order query");
+      });
+  });
+  test("invalid order parameters cause error", () => {
+    return request(app)
+      .get("/api/articles?order=break")
+      .expect(400)
+      .then(({ body }) => {
+        expect(body.msg).toBe("invalid order query");
+      });
+  });
+  test("topic parameters for topic that does not exist causes 404 error", () => {
+    return request(app)
+      .get("/api/articles?topic=break")
+      .expect(404)
+      .then(({ body }) => {
+        expect(body.msg).toBe("No data for this topic");
       });
   });
 });
