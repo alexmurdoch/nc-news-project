@@ -96,37 +96,40 @@ describe("get/api/articles/:articleid", () => {
 });
 
 describe("get/api/articles/:articleid/comments", () => {
-  test("Return an array of comments with 200 message for correct article ID", () => {
-    return request(app)
-      .get("/api/articles/3/comments")
-      .expect(200)
-      .then(({ body }) => {
-        expect(body).toEqual([
-          {
-            body: "git push origin master",
-            votes: 0,
-            author: "icellusedkars",
-            comment_id: 10,
-            article_id: 3,
-            created_at: "2020-06-20T07:24:00.000Z",
-          },
-          {
-            body: "Ambidextrous marsupial",
-            votes: 0,
-            author: "icellusedkars",
-            comment_id: 11,
-            article_id: 3,
-            created_at: "2020-09-19T23:10:00.000Z",
-          },
-        ]);
-      });
-  });
   test("returns correct errors for invalid paths", () => {
     return request(app)
       .get("/api/articles/500/comments")
       .expect(404)
       .then(({ body }) => {
         expect(body.msg).toBe("no comments for given article");
+      });
+  });
+  test("now returns comment count aswell", () => {
+    return request(app)
+      .get("/api/articles/3/comments?count=true")
+      .expect(200)
+      .then(({ body }) => {
+        expect(body).toEqual([
+          [
+            {
+              body: "git push origin master",
+              votes: 0,
+              author: "icellusedkars",
+              comment_id: 10,
+              article_id: 3,
+              created_at: "2020-06-20T07:24:00.000Z",
+            },
+            {
+              body: "Ambidextrous marsupial",
+              votes: 0,
+              author: "icellusedkars",
+              comment_id: 11,
+              article_id: 3,
+              created_at: "2020-09-19T23:10:00.000Z",
+            },
+          ],
+          { comment_count: 2 },
+        ]);
       });
   });
 });
@@ -331,63 +334,16 @@ describe("api queries", () => {
         expect(body.msg).toBe("No data for this topic");
       });
   });
+  test("no query returns results in correct order", () => {
+    return request(app)
+      .get("/api/articles")
+      .expect(200)
+      .then(({ body }) => {
+        expect(body.articles).toBeSortedBy("created_at", { descending: true });
+      });
+  });
 });
 
-describe("get/api/articles/:articleid/comments?queries", () => {
-  test("now returns comment count aswell if given the query count", () => {
-    return request(app)
-      .get("/api/articles/3/comments?count=true")
-      .expect(200)
-      .then(({ body }) => {
-        expect(body).toEqual([
-          [
-            {
-              body: "git push origin master",
-              votes: 0,
-              author: "icellusedkars",
-              comment_id: 10,
-              article_id: 3,
-              created_at: "2020-06-20T07:24:00.000Z",
-            },
-            {
-              body: "Ambidextrous marsupial",
-              votes: 0,
-              author: "icellusedkars",
-              comment_id: 11,
-              article_id: 3,
-              created_at: "2020-09-19T23:10:00.000Z",
-            },
-          ],
-          { comment_count: 2 },
-        ]);
-      });
-  });
-  test("if query is not specified as count = true, it is assumed false", () => {
-    return request(app)
-      .get("/api/articles/3/comments?count=yes")
-      .expect(200)
-      .then(({ body }) => {
-        expect(body).toEqual([
-          {
-            body: "git push origin master",
-            votes: 0,
-            author: "icellusedkars",
-            comment_id: 10,
-            article_id: 3,
-            created_at: "2020-06-20T07:24:00.000Z",
-          },
-          {
-            body: "Ambidextrous marsupial",
-            votes: 0,
-            author: "icellusedkars",
-            comment_id: 11,
-            article_id: 3,
-            created_at: "2020-09-19T23:10:00.000Z",
-          },
-        ]);
-      });
-  });
-});
 describe("delete /api/comments/:comment_id", () => {
   test("deletes the comment matching the given ID, gives 404 when ran again as comment is now deleted", () => {
     return request(app)
@@ -396,7 +352,7 @@ describe("delete /api/comments/:comment_id", () => {
       .then(() => {
         return request(app).delete("/api/comments/3").expect(404);
       })
-      .then(({body}) => {
+      .then(({ body }) => {
         expect(body.msg).toBe("comment not found");
       });
   });
@@ -404,8 +360,16 @@ describe("delete /api/comments/:comment_id", () => {
     return request(app)
       .delete("/api/comments/300")
       .expect(404)
-      .then(({body}) => {
+      .then(({ body }) => {
         expect(body.msg).toBe("comment not found");
+      });
+  });
+  test("returns 400 error when article does not exist", () => {
+    return request(app)
+      .delete("/api/comments/break")
+      .expect(400)
+      .then(({ body }) => {
+        expect(body.msg).toBe("article_id is the wrong data type");
       });
   });
 });

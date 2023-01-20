@@ -35,7 +35,6 @@ const fetchArticles = (query) => {
     });
   }
   if (typeof search !== "string") {
-    console.log("wrong");
     return Promise.reject({
       status: 400,
       msg: "invalid topic query format",
@@ -56,7 +55,7 @@ const fetchArticles = (query) => {
     )
     .then((result) => {
       const unfiltered = result.rows;
-      if(result.rows.length === 0){
+      if (result.rows.length === 0) {
         return Promise.reject({
           status: 404,
           msg: "No data for this topic",
@@ -83,10 +82,9 @@ const fetchArticleById = (article_id) => {
     });
 };
 
-const fetchCommentsByArticleId = (article_id, query) => {
-  queryTruthy = (query.count || false)
+const fetchCommentsByArticleId = (article_id) => {
   
-  
+
   return db
     .query(
       `SELECT * FROM comments WHERE article_id = $1
@@ -102,17 +100,9 @@ const fetchCommentsByArticleId = (article_id, query) => {
           msg: "no comments for given article",
         });
       } else {
-        if(queryTruthy === "true"){
-          let output = (result.rows, {comment_count: result.rows.length });
-            // console.log(result.rows, {comment_count: result.rows.length });
-          
-          return [result.rows , {comment_count: result.rows.length }]; 
-         
-        }
-        else{
-          
-          return result.rows
-        }
+        let output = (result.rows, { comment_count: result.rows.length });
+
+        return [result.rows, { comment_count: result.rows.length }];
       }
     });
 };
@@ -163,20 +153,26 @@ const fetchUsers = () => {
 };
 
 const removeComment = (id) => {
-  return db.query(`DELETE FROM comments WHERE comment_id= $1 RETURNING*;`,[id])
-  .then((deleted)=> {
-  const deletedComment = deleted.rows
-  if (deletedComment.length === 0){
+ 
+  if(isNaN(id)){
+    
     return Promise.reject({
-      status: 404,
-      msg: "comment not found",
-    })
+      status: 400,
+      msg: "article_id is the wrong data type",
+    });
   }
-  
-  }
-  )
-
-}
+  return db
+    .query(`DELETE FROM comments WHERE comment_id= $1 RETURNING*;`, [id])
+    .then((deleted) => {
+      const deletedComment = deleted.rows;
+      if (deletedComment.length === 0) {
+        return Promise.reject({
+          status: 404,
+          msg: "comment not found",
+        });
+      }
+    });
+};
 
 module.exports = {
   fetchUsers,
@@ -186,10 +182,5 @@ module.exports = {
   fetchCommentsByArticleId,
   addCommentByArticleId,
   addVotes,
-  removeComment
+  removeComment,
 };
-// `SELECT articles.*, COUNT(comments.article_id) AS comment_count
-// FROM comments
-//  RIGHT JOIN articles ON comments.article_id = articles.article_id
-// GROUP BY articles.article_id
-// ORDER BY created_at DESC;`
