@@ -1,5 +1,5 @@
 const db = require("../db/connection");
-const app = require("../db/app");
+const app = require("../code/app");
 const seed = require("../db/seeds/seed");
 const data = require("../db/data/test-data");
 const request = require("supertest");
@@ -101,7 +101,7 @@ describe("get/api/articles/:articleid/comments", () => {
       .get("/api/articles/3/comments")
       .expect(200)
       .then(({ body }) => {
-        expect(body.article).toEqual([
+        expect(body).toEqual([
           {
             body: "git push origin master",
             votes: 0,
@@ -142,12 +142,7 @@ describe("post/api/articles/:articleid/comments", () => {
       .send(comment)
       .expect(201)
       .then((result) => {
-        expect(result.body.comment_id).toBe(19);
-        expect(result.body.author).toBe("icellusedkars");
-        expect(result.body.body).toBe("Great article!");
-        expect(result.body.votes).toBe(0);
-        expect(result.body.article_id).toBe(3);
-        expect(typeof result.body.created_at).toBe(typeof Date());
+        expect(result.body).toEqual({ comment: "Great article!" });
       });
   });
   test("returns 404 error if invalid path", () => {
@@ -164,5 +159,253 @@ describe("post/api/articles/:articleid/comments", () => {
       });
   });
 });
+test("returns 404 error if article id not a number", () => {
+  const comment = {
+    username: "icellusedkars",
+    body: "Great article!",
+  };
+  return request(app)
+    .post("/api/articles/alex/comments")
+    .send(comment)
+    .expect(404)
+    .then(({ body }) => {
+      expect(body).toEqual({ msg: "404, article not found" });
+    });
+});
 
+test("returns 404 error if no comment given", () => {
+  const comment = {
+    username: "icellusedkars",
+  };
+  return request(app)
+    .post("/api/articles/3/comments")
+    .send(comment)
+    .expect(404)
+    .then(({ body }) => {
+      expect(body).toEqual({ msg: "404, article not found" });
+    });
+});
 
+describe("patch/api/articles/:article_id", () => {
+  test("updates the votes of an article by given paramater, no existing votes", () => {
+    const votes = { inc_votes: 10 };
+    return request(app)
+      .patch("/api/articles/3")
+      .send(votes)
+      .expect(200)
+      .then(({ body }) => {
+        expect(body).toEqual(
+          expect.objectContaining({
+            article_id: expect.any(Number),
+            title: expect.any(String),
+            topic: expect.any(String),
+            created_at: expect.any(String),
+            article_img_url: expect.any(String),
+            votes: expect.any(Number),
+            author: expect.any(String),
+            body: expect.any(String),
+          })
+        );
+        expect(body.votes).toBe(10);
+      });
+  });
+  test("returns 404 error if article id that isnt in database is given ", () => {
+    const votes = { inc_votes: 10 };
+    return request(app)
+      .patch("/api/articles/5000")
+      .send(votes)
+      .expect(404)
+      .then((body) => {
+        expect(body._body.msg).toBe("Invalid article ID or no votes passed");
+      });
+  });
+  test("returns 404 error if invalid format for votes given", () => {
+    const votes = { votes: "10" };
+    return request(app)
+      .patch("/api/articles/3")
+      .send(votes)
+      .expect(404)
+      .then((body) => {
+        expect(body._body.msg).toBe("Invalid data type");
+      });
+  });
+});
+
+describe("get/api/users", () => {
+  test("Return users with the correct properties with 200", () => {
+    return request(app)
+      .get("/api/users")
+      .expect(200)
+      .then(({ body }) => {
+        expect(body).toHaveLength(4);
+        body.forEach((user) => {
+          expect(user).toEqual(
+            expect.objectContaining({
+              username: expect.any(String),
+              name: expect.any(String),
+              avatar_url: expect.any(String),
+            })
+          );
+        });
+      });
+  });
+});
+
+describe("api queries", () => {
+  test("returns correct topic to the topic query", () => {
+    return request(app)
+      .get("/api/articles?topic=mitch")
+      .expect(200)
+      .then(({ body }) => {
+        expect(body.articles).toHaveLength(11);
+        body.articles.forEach((article) => {
+          expect(article).toEqual(
+            expect.objectContaining({
+              title: expect.any(String),
+              topic: expect.any(String),
+              created_at: expect.any(String),
+              article_img_url: expect.any(String),
+              article_id: expect.any(Number),
+              votes: expect.any(Number),
+              author: expect.any(String),
+              comment_count: expect.any(String),
+            })
+          );
+        });
+      });
+  });
+
+  test("returns correct order when using sort_by with order", () => {
+    return request(app)
+      .get("/api/articles?sort_by=topic&order=asc")
+      .expect(200)
+      .then(({ body }) => {
+        expect(body.articles).toBeSortedBy("topic", { ascending: true });
+      });
+  });
+  test("combines all 3 queries", () => {
+    return request(app)
+      .get("/api/articles?topic=mitch&sort_by=author&order=asc")
+      .expect(200)
+      .then(({ body }) => {
+        expect(body.articles).toBeSortedBy("author", { ascending: true });
+      });
+  });
+  test("invalid query given returns data with default queries", () => {
+    return request(app)
+      .get("/api/articles?abcd")
+      .expect(200)
+      .then(({ body }) => {
+        expect(body.articles).toBeSortedBy("created_at", { descending: true });
+      });
+  });
+  test("invalid sort_by parameters cause error", () => {
+    return request(app)
+      .get("/api/articles?sort_by=break")
+      .expect(400)
+      .then(({ body }) => {
+        expect(body.msg).toBe("invalid sort_by query");
+      });
+  });
+  test("invalid order parameters cause error", () => {
+    return request(app)
+      .get("/api/articles?order=break")
+      .expect(400)
+      .then(({ body }) => {
+        expect(body.msg).toBe("invalid order query");
+      });
+  });
+  test("invalid order parameters cause error", () => {
+    return request(app)
+      .get("/api/articles?order=break")
+      .expect(400)
+      .then(({ body }) => {
+        expect(body.msg).toBe("invalid order query");
+      });
+  });
+  test("topic parameters for topic that does not exist causes 404 error", () => {
+    return request(app)
+      .get("/api/articles?topic=break")
+      .expect(404)
+      .then(({ body }) => {
+        expect(body.msg).toBe("No data for this topic");
+      });
+  });
+});
+
+describe("get/api/articles/:articleid/comments?queries", () => {
+  test("now returns comment count aswell if given the query count", () => {
+    return request(app)
+      .get("/api/articles/3/comments?count=true")
+      .expect(200)
+      .then(({ body }) => {
+        expect(body).toEqual([
+          [
+            {
+              body: "git push origin master",
+              votes: 0,
+              author: "icellusedkars",
+              comment_id: 10,
+              article_id: 3,
+              created_at: "2020-06-20T07:24:00.000Z",
+            },
+            {
+              body: "Ambidextrous marsupial",
+              votes: 0,
+              author: "icellusedkars",
+              comment_id: 11,
+              article_id: 3,
+              created_at: "2020-09-19T23:10:00.000Z",
+            },
+          ],
+          { comment_count: 2 },
+        ]);
+      });
+  });
+  test("if query is not specified as count = true, it is assumed false", () => {
+    return request(app)
+      .get("/api/articles/3/comments?count=yes")
+      .expect(200)
+      .then(({ body }) => {
+        expect(body).toEqual([
+          {
+            body: "git push origin master",
+            votes: 0,
+            author: "icellusedkars",
+            comment_id: 10,
+            article_id: 3,
+            created_at: "2020-06-20T07:24:00.000Z",
+          },
+          {
+            body: "Ambidextrous marsupial",
+            votes: 0,
+            author: "icellusedkars",
+            comment_id: 11,
+            article_id: 3,
+            created_at: "2020-09-19T23:10:00.000Z",
+          },
+        ]);
+      });
+  });
+});
+describe("delete /api/comments/:comment_id", () => {
+  test("deletes the comment matching the given ID, gives 404 when ran again as comment is now deleted", () => {
+    return request(app)
+      .delete("/api/comments/3")
+      .expect(204)
+      .then(() => {
+        return request(app).delete("/api/comments/3").expect(404);
+      })
+      .then(({body}) => {
+        expect(body.msg).toBe("comment not found");
+      });
+  });
+  test("returns 404 error when article does not exist", () => {
+    return request(app)
+      .delete("/api/comments/300")
+      .expect(404)
+      .then(({body}) => {
+        expect(body.msg).toBe("comment not found");
+      });
+  });
+});
