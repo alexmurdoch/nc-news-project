@@ -7,6 +7,7 @@ const {
   addVotes,
   fetchUsers,
   removeComment,
+  getJson,
 } = require("./models");
 
 const getTopics = (req, res, next) => {
@@ -43,7 +44,6 @@ const getArticleById = (req, res, next) => {
 
 const getCommentsByArticleId = (req, res, next) => {
   const { article_id } = req.params;
-  
 
   fetchCommentsByArticleId(article_id)
     .then((article) => {
@@ -103,6 +103,14 @@ const deleteComment = (req, res, next) => {
     });
 };
 
+const getApi = (req, res, next) => {
+  getJson().then((json) => {
+    const parsed = JSON.parse(json);
+    const output = parsed;
+    res.status(200).send(output);
+  });
+};
+
 module.exports = {
   getUsers,
   getTopics,
@@ -112,4 +120,5 @@ module.exports = {
   postCommentByArticleId,
   patchArticleByArticleId,
   deleteComment,
+  getApi,
 };
