@@ -6,7 +6,7 @@ const {
   addCommentByArticleId,
   addVotes,
   fetchUsers,
-  removeComment
+  removeComment,
 } = require("./models");
 
 const getTopics = (req, res, next) => {
@@ -43,13 +43,11 @@ const getArticleById = (req, res, next) => {
 
 const getCommentsByArticleId = (req, res, next) => {
   const { article_id } = req.params;
-  const query = req.query
-  
-  
+  const query = req.query;
+
   fetchCommentsByArticleId(article_id, query)
     .then((article) => {
-      
-      res.status(200).send( article );
+      res.status(200).send(article);
     })
     .catch((err) => {
       next(err);
@@ -93,17 +91,17 @@ const getUsers = (req, res, next) => {
       next(err);
     });
 };
-const deleteComment = (req,res,next) => {
-  const id = req.params.comment_id
-  
+const deleteComment = (req, res, next) => {
+  const id = req.params.comment_id;
+
   removeComment(id)
-    .then(()=> {
-      res.status(204).send("object deleted")
+    .then(() => {
+      res.status(204).send("object deleted");
     })
     .catch((err) => {
       next(err);
     });
-}
+};
 
 module.exports = {
   getUsers,
@@ -113,5 +111,5 @@ module.exports = {
   getCommentsByArticleId,
   postCommentByArticleId,
   patchArticleByArticleId,
-  deleteComment
+  deleteComment,
 };
