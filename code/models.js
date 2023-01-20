@@ -1,5 +1,5 @@
 const db = require("../db/connection");
-
+const fs = require("fs/promises");
 const fetchTopics = () => {
   return db
     .query(
@@ -83,8 +83,6 @@ const fetchArticleById = (article_id) => {
 };
 
 const fetchCommentsByArticleId = (article_id) => {
-  
-
   return db
     .query(
       `SELECT * FROM comments WHERE article_id = $1
@@ -153,9 +151,7 @@ const fetchUsers = () => {
 };
 
 const removeComment = (id) => {
- 
-  if(isNaN(id)){
-    
+  if (isNaN(id)) {
     return Promise.reject({
       status: 400,
       msg: "article_id is the wrong data type",
@@ -174,6 +170,10 @@ const removeComment = (id) => {
     });
 };
 
+const getJson = () => {
+  return fs.readFile("endpoints.json", () => {});
+};
+
 module.exports = {
   fetchUsers,
   fetchTopics,
@@ -183,4 +183,5 @@ module.exports = {
   addCommentByArticleId,
   addVotes,
   removeComment,
+  getJson,
 };
